@@ -24,7 +24,7 @@ ENV CGO_ENABLED=0
 # ENV GOFLAGS=-mod=vendor //use it when your packages in a vendor folder in project root
 
 # Set the Current Working Directory inside the container
-WORKDIR $GOPATH/src/github.com/Mekawy5/Binance
+WORKDIR $GOPATH/src/github.com/Mekawy5/binance
 
 # caching go dependencies
 COPY go.mod .
