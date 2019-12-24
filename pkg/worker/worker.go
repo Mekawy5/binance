@@ -1,11 +1,12 @@
 package worker
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 
 	util "github.com/Mekawy5/binance/util"
 	"github.com/gorilla/websocket"
@@ -35,12 +36,14 @@ type Symbols struct {
 
 // Trade info
 type Trade struct {
-	Symbol string `json:"s"`
-	Time   int    `json:"T"`
-	ID     int    `json:"t"`
-	Price  string `json:"p"`
-	Amount string `json:"q"`
+	Symbol string
+	Time   int
+	ID     int
+	Price  string
+	Amount string
 }
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // GetSymbols from the exchange server
 func GetSymbols() Symbols {
@@ -90,7 +93,6 @@ func NewProcessor() *Processor {
 }
 
 func (p *Processor) handleMessages() {
-	var t Trade
 	for {
 		_, msg, err := p.conn.ReadMessage()
 		if err != nil {
@@ -98,12 +100,21 @@ func (p *Processor) handleMessages() {
 			return
 		}
 
-		err = json.Unmarshal([]byte(msg), &t)
-		if err != nil {
-			panic(err)
-		}
+		data := json.Get(msg, "data").ToString()
+		if data != "" {
+			t := Trade{
+				Symbol: json.Get(msg, "data", "s").ToString(),
+				ID:     json.Get(msg, "data", "t").ToInt(),
+				Time:   json.Get(msg, "data", "T").ToInt(),
+				Price:  json.Get(msg, "data", "p").ToString(),
+				Amount: json.Get(msg, "data", "q").ToString(),
+			}
 
-		fmt.Println(string([]byte(msg)))
+			msg, _ := json.MarshalToString(t)
+
+			fmt.Println(msg)
+			// Produce message to kafka.
+		}
 	}
 }
 
