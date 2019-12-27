@@ -82,7 +82,6 @@ func connect() *websocket.Conn {
 
 	fmt.Println("socket connection without errors.")
 	return c
-	// remember to defer close this connection.
 }
 
 // NewProcessor func creates new processor var
@@ -110,17 +109,17 @@ func (p *Processor) handleMessages() {
 				Amount: json.Get(msg, "data", "q").ToString(),
 			}
 
-			msg, _ := json.MarshalToString(t)
-
-			fmt.Println(msg)
-			// Produce message to kafka.
+			trade, _ := json.MarshalToString(t)
+			fmt.Println(trade)
 		}
 	}
 }
 
-// Process read authentication result
+// Process subscription
 func (p *Processor) Process() {
 	defer p.conn.Close()
 
 	p.handleMessages()
+
+	// recieve a channel that will be passed tp handleMessages() to push messages to it
 }
