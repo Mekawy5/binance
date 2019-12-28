@@ -20,6 +20,7 @@ const (
 // Processor struct contains websocket connection
 type Processor struct {
 	conn *websocket.Conn
+	ch   chan string
 }
 
 // Symbol definition
@@ -85,9 +86,10 @@ func connect() *websocket.Conn {
 }
 
 // NewProcessor func creates new processor var
-func NewProcessor() *Processor {
+func NewProcessor(tc chan string) *Processor {
 	return &Processor{
 		conn: connect(),
+		ch:   tc,
 	}
 }
 
@@ -110,7 +112,7 @@ func (p *Processor) handleMessages() {
 			}
 
 			trade, _ := json.MarshalToString(t)
-			fmt.Println(trade)
+			p.ch <- trade
 		}
 	}
 }
@@ -120,6 +122,4 @@ func (p *Processor) Process() {
 	defer p.conn.Close()
 
 	p.handleMessages()
-
-	// recieve a channel that will be passed tp handleMessages() to push messages to it
 }

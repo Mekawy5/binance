@@ -32,7 +32,6 @@ func NewProducer() *Producer {
 	if err != nil {
 		panic(err)
 	}
-	defer prod.AsyncClose()
 
 	return &Producer{
 		*topic,
@@ -51,7 +50,7 @@ func (p *Producer) ProcessResponse() {
 	for {
 		select {
 		case result := <-p.Successes():
-			fmt.Printf("Wrote to Partition : %d - offset : %d", result.Partition, result.Offset)
+			fmt.Printf("Wrote to Partition : %d - offset : %d\n", result.Partition, result.Offset)
 		case err := <-p.Errors():
 			fmt.Println("Failed to produce message", err)
 		}

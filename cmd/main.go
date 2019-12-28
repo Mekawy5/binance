@@ -1,13 +1,20 @@
 package main
 
-import "github.com/Mekawy5/binance/pkg/worker"
+import (
+	"github.com/Mekawy5/binance/pkg/kafka"
+	"github.com/Mekawy5/binance/pkg/worker"
+)
 
 func main() {
-	p := worker.NewProcessor()
-	p.Process()
+	tc := make(chan string)
 
-	// here create channel named trades & send it to process so all trades exists in this channel
-	// create kafka producer
-	// start handling producer response
-	// start recieve messages from trades channel and write it to kafka using the producer's Produce()
+	p := worker.NewProcessor(tc)
+	go p.Process()
+
+	kp := kafka.NewProducer()
+	go kp.ProcessResponse()
+
+	for msg := range tc {
+		kp.Produce(msg)
+	}
 }
